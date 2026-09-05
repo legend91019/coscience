@@ -13,10 +13,9 @@ import {
   Plus,
   Radio,
   ShieldCheck,
-  Server,
-  HardDrive,
 } from 'lucide-react'
-import { createRemoteConsoleSnapshot, summarizeRemoteConsole } from '../remote/console.ts'
+import { RemoteConsole } from '../remote/RemoteConsole.tsx'
+import { createRemoteConsoleSnapshot } from '../remote/console.ts'
 import type { RemoteConsoleSnapshot } from '../remote/console.ts'
 
 import {
@@ -591,7 +590,7 @@ function ExperimentConsole({
     <div className="console-stack">
       <section className="console-section">
         <SectionTitle icon={<Server size={18} />} title="Remote experiment console" />
-        <RemoteConsolePanel snapshot={remoteSnapshot} />
+        <RemoteConsole snapshot={remoteSnapshot} />
       </section>
 
       <section className="console-section">
@@ -671,31 +670,6 @@ function ExperimentConsole({
           </div>
         ) : null}
       </section>
-    </div>
-  )
-}
-
-function RemoteConsolePanel({ snapshot }: { snapshot: RemoteConsoleSnapshot }) {
-  const summary = summarizeRemoteConsole(snapshot)
-  return (
-    <div className="remote-panel">
-      <div className="remote-header">
-        <div><strong>{snapshot.serverName}</strong><span>{snapshot.connection.label}</span></div>
-        <StatusPill icon={<Radio size={14} />} label="Status" value={summary.readiness} />
-      </div>
-      <div className="remote-summary">
-        <span><Server size={14} /> {summary.connection}</span>
-        <span><FlaskConical size={14} /> {summary.run}</span>
-        <span><HardDrive size={14} /> {summary.artifacts}</span>
-      </div>
-      <div className="remote-empty"><CircleAlert size={16} /><span>{snapshot.connection.details}</span></div>
-      <div className="policy-list">
-        {snapshot.completionPolicies.map((policy) => (
-          <div className={`policy-row ${policy.safety}`} key={policy.action}>
-            <strong>{policy.title}</strong><span>{policy.safety}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

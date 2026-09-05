@@ -425,68 +425,6 @@ a {
   flex: 1;
 }
 
-.remote-panel {
-  display: grid;
-  gap: 12px;
-}
-
-.remote-header,
-.remote-summary,
-.policy-row {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.remote-header strong,
-.remote-header span {
-  display: block;
-}
-
-.remote-header span,
-.remote-summary,
-.remote-empty,
-.policy-row span {
-  color: #6d766e;
-  font-size: 12px;
-}
-
-.remote-summary {
-  align-items: flex-start;
-  display: grid;
-  gap: 6px;
-}
-
-.remote-summary span,
-.remote-empty {
-  align-items: center;
-  display: flex;
-  gap: 7px;
-}
-
-.remote-empty {
-  background: #f4f0e7;
-  border: 1px dashed #c8c0af;
-  border-radius: 6px;
-  padding: 10px;
-}
-
-.policy-list {
-  border-top: 1px solid #e1dacd;
-  display: grid;
-  gap: 8px;
-  padding-top: 10px;
-}
-
-.policy-row {
-  font-size: 12px;
-}
-
-.policy-row.safe span { color: #2f7657; }
-.policy-row.needs-review span { color: #9a6a16; }
-.policy-row.blocked span { color: #a24d46; }
-
 @media (max-width: 980px) {
   .coscience-shell {
     grid-template-columns: 1fr;

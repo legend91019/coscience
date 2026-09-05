@@ -13,7 +13,7 @@
     "desktop:dir": "npm run build && electron-builder --win --x64 --dir",
     "desktop:portable": "npm run build && electron-builder --win portable --x64",
     "desktop:build": "npm run build && electron-builder --win --x64",
-    "test": "node --test src/core/evidence-domain.test.ts src/ui/repository.test.ts src/ui/domain-adapter.test.ts src/remote/console.test.ts src/remote/adapter.test.ts"
+    "test": "node --test electron/main.test.cjs electron/startup-failure.test.cjs electron/service/main.test.cjs src/core/evidence-domain.test.ts src/ui/repository.test.ts src/ui/domain-adapter.test.ts src/remote/console.test.ts src/remote/adapter.test.ts src/service/status.test.ts src/service/http.test.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

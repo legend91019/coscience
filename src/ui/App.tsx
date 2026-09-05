@@ -13,7 +13,11 @@ import {
   Plus,
   Radio,
   ShieldCheck,
+  Server,
+  HardDrive,
 } from 'lucide-react'
+import { createRemoteConsoleSnapshot, summarizeRemoteConsole } from '../remote/console.ts'
+import type { RemoteConsoleSnapshot } from '../remote/console.ts'
 
 import {
   appendEvidenceRecord,
@@ -475,6 +479,7 @@ function ExperimentConsole({
   onUpdateProject: (project: WorkspaceProjectBundle) => void
 }) {
   const pilotNodes = project.nodes.filter((node) => node.group === 'pilot')
+  const approvedNodes = project.nodes.filter((node) => node.status !== 'draft')
   const [group, setGroup] = useState<ExperimentGroup>('pilot')
   const [title, setTitle] = useState('')
   const [question, setQuestion] = useState('')
@@ -490,6 +495,14 @@ function ExperimentConsole({
   const [branchRationale, setBranchRationale] = useState('')
   const [branchCost, setBranchCost] = useState('')
   const [branchUncertainty, setBranchUncertainty] = useState('')
+  const remoteSnapshot: RemoteConsoleSnapshot = useMemo(() => createRemoteConsoleSnapshot({
+    serverName: 'Remote server',
+    connection: { status: 'not-configured', label: 'No SSH host configured', details: 'Connect a server to view live GPU and run state.', lastCheckedAt: null },
+    gpus: [],
+    run: { id: 'none', title: 'No remote run selected', status: 'unknown', stage: 'Not connected', progress: null, currentStep: null, lastUpdateAt: null, blockers: ['Remote execution is not connected.'] },
+    artifacts: [],
+    notes: ['Live GPU metrics and server actions will appear after a local SSH adapter is configured.'],
+  }), [])
 
   const selectedNode = approvedNodes.find((node) => node.id === evidenceNodeId) ?? approvedNodes[0] ?? null
   const selectedEvidence = selectedNode ? project.evidences.filter((evidence) => evidence.nodeId === selectedNode.id) : []
@@ -577,6 +590,11 @@ function ExperimentConsole({
   return (
     <div className="console-stack">
       <section className="console-section">
+        <SectionTitle icon={<Server size={18} />} title="Remote experiment console" />
+        <RemoteConsolePanel snapshot={remoteSnapshot} />
+      </section>
+
+      <section className="console-section">
         <SectionTitle icon={<FlaskConical size={18} />} title="Experiment node" />
         <div className="segmented-control" role="group" aria-label="Experiment group">
           <button className={group === 'pilot' ? 'selected' : ''} type="button" onClick={() => setGroup('pilot')}>
@@ -653,6 +671,31 @@ function ExperimentConsole({
           </div>
         ) : null}
       </section>
+    </div>
+  )
+}
+
+function RemoteConsolePanel({ snapshot }: { snapshot: RemoteConsoleSnapshot }) {
+  const summary = summarizeRemoteConsole(snapshot)
+  return (
+    <div className="remote-panel">
+      <div className="remote-header">
+        <div><strong>{snapshot.serverName}</strong><span>{snapshot.connection.label}</span></div>
+        <StatusPill icon={<Radio size={14} />} label="Status" value={summary.readiness} />
+      </div>
+      <div className="remote-summary">
+        <span><Server size={14} /> {summary.connection}</span>
+        <span><FlaskConical size={14} /> {summary.run}</span>
+        <span><HardDrive size={14} /> {summary.artifacts}</span>
+      </div>
+      <div className="remote-empty"><CircleAlert size={16} /><span>{snapshot.connection.details}</span></div>
+      <div className="policy-list">
+        {snapshot.completionPolicies.map((policy) => (
+          <div className={`policy-row ${policy.safety}`} key={policy.action}>
+            <strong>{policy.title}</strong><span>{policy.safety}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

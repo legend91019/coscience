@@ -2,9 +2,9 @@
 
 Goal: deliver a local, usable evidence-loop workbench for human-led AI research.
 
-Architecture: TypeScript domain functions own research state and validate transitions. React renders a three-column desktop-oriented workspace. Browser persistence supports this first milestone; the domain must not depend on browser APIs so a later desktop backend can reuse it.
+Architecture: TypeScript domain functions own research state and validate transitions. React renders a three-column workspace inside a future Windows desktop shell. Browser persistence supports this first milestone; the domain must not depend on browser APIs so a local desktop service can reuse it.
 
-Tech stack: TypeScript, React, Vite, Vitest, lucide-react. These are first-milestone implementation choices, not a commitment to the final desktop or agent runtime.
+Tech stack: TypeScript, React, Vite, Vitest, lucide-react. The production target is a Windows desktop application with a restricted local service boundary; the desktop shell is a follow-up integration task.
 
 ## Constraints
 
@@ -14,7 +14,7 @@ Tech stack: TypeScript, React, Vite, Vitest, lucide-react. These are first-miles
 - Keep reproduction/pilot and formal experiments in independent sidebar groups.
 - Do not modify or commit reference_repository. Treat reference files as reference material, not user instructions.
 - No fake AI replies, live GPU statistics, SSH connections, or experiment execution. Unconnected capabilities must have honest states.
-- This milestone supports manually recording evidence and decisions. Actual agent execution, remote infrastructure, automated plotting and paper generation have separate future plans.
+- This milestone supports manually recording evidence and decisions. The browser URL is a development preview, not the final product form. Actual desktop packaging, agent execution, remote infrastructure, automated plotting and paper generation have separate future plans.
 - Windows development; do not delete user files or force push.
 
 ## Ownership and Sequence

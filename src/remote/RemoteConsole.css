@@ -1,0 +1,299 @@
+.remote-console {
+  color: #dbe5ee;
+  background: #101820;
+  border: 1px solid #2c3a46;
+  padding: 16px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.remote-console__header,
+.remote-console__row,
+.remote-console__progress-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.remote-console__header {
+  border-bottom: 1px solid #2c3a46;
+  padding-bottom: 14px;
+}
+
+.remote-console__eyebrow,
+.remote-console__summary-item small {
+  color: #91a5b5;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.remote-console h2,
+.remote-console h3,
+.remote-console p {
+  margin: 0;
+}
+
+.remote-console h2 {
+  font-size: 17px;
+  font-weight: 650;
+  margin-top: 4px;
+}
+
+.remote-console__connection,
+.remote-console__status {
+  align-items: center;
+  display: inline-flex;
+  font-size: 11px;
+  gap: 5px;
+  line-height: 1.2;
+}
+
+.remote-console__connection {
+  border: 1px solid #3c5960;
+  color: #8fe0bb;
+  padding: 6px 8px;
+}
+
+.remote-console__connection--disconnected,
+.remote-console__connection--unknown,
+.remote-console__connection--not-configured {
+  color: #e8b28b;
+}
+
+.remote-console__summary {
+  border-bottom: 1px solid #2c3a46;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 14px 0;
+}
+
+.remote-console__summary-item {
+  align-items: flex-start;
+  color: #91a5b5;
+  display: flex;
+  gap: 8px;
+}
+
+.remote-console__summary-item span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.remote-console__summary-item strong {
+  color: #dbe5ee;
+  font-size: 11px;
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remote-console__stack {
+  display: grid;
+  gap: 18px;
+  padding-top: 16px;
+}
+
+.remote-console__section {
+  display: grid;
+  gap: 10px;
+}
+
+.remote-console__section-heading {
+  align-items: center;
+  color: #a6d9d1;
+  display: flex;
+  gap: 7px;
+}
+
+.remote-console__section-heading h3 {
+  color: #dbe5ee;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.remote-console__gpu-list,
+.remote-console__artifact-list,
+.remote-console__policy-list {
+  display: grid;
+  gap: 8px;
+}
+
+.remote-console__gpu,
+.remote-console__run,
+.remote-console__artifact,
+.remote-console__policy {
+  background: #17232d;
+  border: 1px solid #2c3a46;
+  padding: 10px;
+}
+
+.remote-console__gpu strong,
+.remote-console__run strong,
+.remote-console__artifact strong,
+.remote-console__policy strong {
+  color: #e4edf2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.remote-console__meter {
+  background: #273641;
+  height: 5px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.remote-console__meter span {
+  background: #61c7b7;
+  display: block;
+  height: 100%;
+  transition: width 160ms ease;
+}
+
+.remote-console__meta,
+.remote-console__artifact small,
+.remote-console__policy small,
+.remote-console__helper,
+.remote-console__empty {
+  color: #91a5b5;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.remote-console__meta {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 7px;
+}
+
+.remote-console__run {
+  display: grid;
+  gap: 8px;
+}
+
+.remote-console__run p,
+.remote-console__artifact p,
+.remote-console__policy p {
+  color: #b8c6cf;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.remote-console__progress-row {
+  gap: 8px;
+}
+
+.remote-console__progress-row > span {
+  color: #a6d9d1;
+  font-size: 11px;
+  min-width: 32px;
+  text-align: right;
+}
+
+.remote-console__artifact {
+  display: grid;
+  gap: 6px;
+}
+
+.remote-console__artifact code {
+  color: #b8d6dd;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.remote-console__warnings {
+  color: #e8b28b;
+  font-size: 11px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.remote-console__policy {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.remote-console__policy-icon {
+  color: #a6d9d1;
+  padding-top: 1px;
+}
+
+.remote-console__policy-body {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.remote-console__policy-button {
+  background: transparent;
+  border: 1px solid #4a6972;
+  color: #b8d6dd;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  padding: 5px 7px;
+}
+
+.remote-console__policy-button:hover,
+.remote-console__policy-button:focus-visible {
+  border-color: #a6d9d1;
+  color: #e4edf2;
+}
+
+.remote-console__status {
+  color: #91a5b5;
+  text-transform: capitalize;
+}
+
+.remote-console__status--safe,
+.remote-console__status--connected,
+.remote-console__status--idle,
+.remote-console__status--completed {
+  color: #8fe0bb;
+}
+
+.remote-console__status--blocked,
+.remote-console__status--failed,
+.remote-console__status--stalled,
+.remote-console__status--memory-pressure {
+  color: #e8b28b;
+}
+
+.remote-console__notes {
+  align-items: flex-start;
+  border-top: 1px solid #2c3a46;
+  color: #e8b28b;
+  display: flex;
+  font-size: 11px;
+  gap: 7px;
+  line-height: 1.45;
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+@media (max-width: 520px) {
+  .remote-console {
+    padding: 12px;
+  }
+
+  .remote-console__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .remote-console__policy {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .remote-console__policy-button {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

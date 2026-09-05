@@ -1,0 +1,12 @@
+reference_repository/
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.coscience/
+test-results/
+playwright-report/

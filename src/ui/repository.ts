@@ -3,6 +3,19 @@ import type { WorkspaceSnapshot } from './domain-adapter.ts'
 export const WORKSPACE_SCHEMA_VERSION = 1
 export const WORKSPACE_STORAGE_KEY = 'coscience.workspace.v1'
 
+export function exportWorkspaceSnapshot(snapshot: WorkspaceSnapshot): string {
+  return JSON.stringify({ schemaVersion: WORKSPACE_SCHEMA_VERSION, payload: snapshot })
+}
+
+export function importWorkspaceSnapshot(raw: string): WorkspaceSnapshot {
+  let decoded: unknown
+  try { decoded = JSON.parse(raw) } catch (error) { throw new InvalidWorkspaceDataError('Workspace export is not valid JSON.') }
+  if (!isRecord(decoded) || decoded.schemaVersion !== WORKSPACE_SCHEMA_VERSION || !isWorkspaceSnapshot(decoded.payload)) {
+    throw new InvalidWorkspaceDataError('Workspace export uses an unsupported schema or is missing fields.')
+  }
+  return decoded.payload
+}
+
 export class InvalidWorkspaceDataError extends Error {
   recoverable = true
 
@@ -46,32 +59,13 @@ export function createBrowserWorkspaceRepository(storage: Storage): WorkspaceRep
         return createEmptyWorkspaceSnapshot()
       }
 
-      let decoded: unknown
-      try {
-        decoded = JSON.parse(raw)
-      } catch (error) {
-        throw new InvalidWorkspaceDataError('Saved workspace data is not valid JSON.')
+      try { return importWorkspaceSnapshot(raw) } catch (error) {
+        if (error instanceof InvalidWorkspaceDataError) throw error
+        throw new InvalidWorkspaceDataError('Saved workspace data could not be read.')
       }
-
-      if (!isRecord(decoded) || decoded.schemaVersion !== WORKSPACE_SCHEMA_VERSION) {
-        throw new InvalidWorkspaceDataError('Saved workspace data uses an unsupported schema version.')
-      }
-
-      const payload = decoded.payload
-      if (!isWorkspaceSnapshot(payload)) {
-        throw new InvalidWorkspaceDataError('Saved workspace data is missing required workspace fields.')
-      }
-
-      return payload
     },
     save(snapshot) {
-      storage.setItem(
-        WORKSPACE_STORAGE_KEY,
-        JSON.stringify({
-          schemaVersion: WORKSPACE_SCHEMA_VERSION,
-          payload: snapshot,
-        }),
-      )
+      storage.setItem(WORKSPACE_STORAGE_KEY, exportWorkspaceSnapshot(snapshot))
     },
   }
 }

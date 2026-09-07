@@ -69,7 +69,7 @@ export type ExperimentNode = {
   id: string
   projectId: string
   kind: ExperimentNodeKind
-  hypothesisRevisionId: string
+  hypothesisRevisionId: string | null
   title: string
   validationQuestion: string
   plan: string
@@ -221,7 +221,7 @@ export function draftHypothesisRevision(
 export function draftExperimentNode(
   project: ProjectState,
   input: {
-    hypothesisRevisionId: string
+    hypothesisRevisionId: string | null
     kind?: ExperimentNodeKind
     title: string
     validationQuestion: string
@@ -231,7 +231,9 @@ export function draftExperimentNode(
     createdAt?: number
   },
 ): { project: ProjectState; node: ExperimentNode } {
-  ensureHypothesisRevision(project, input.hypothesisRevisionId)
+  if (input.hypothesisRevisionId !== null) {
+    ensureHypothesisRevision(project, input.hypothesisRevisionId)
+  }
 
   const node: ExperimentNode = {
     id: nextId(project, 'node'),
@@ -260,6 +262,47 @@ export function draftExperimentNode(
       nodes: [...project.nodes, node],
     },
     node,
+  }
+}
+
+export function recordManualEvidence(
+  project: ProjectState,
+  input: {
+    nodeId: string
+    summary: string
+    result: EvidenceResult
+    sourceRun: string
+    limitations: string
+    createdAt?: number
+  },
+): { project: ProjectState; run: ExperimentRun; evidence: EvidenceRecord } {
+  const createdAt = input.createdAt ?? 0
+  const runResult = recordRun(project, {
+    nodeId: input.nodeId,
+    codeVersion: `manual:${normalizeText(input.sourceRun) || 'evidence'}`,
+    dataVersion: `manual:${input.nodeId}`,
+    parameters: {
+      sourceRun: input.sourceRun,
+      limitations: input.limitations,
+    },
+    environment: 'manual',
+    seed: 0,
+    status: 'completed',
+    createdAt,
+  })
+
+  const evidenceResult = recordEvidence(runResult.project, {
+    runId: runResult.run.id,
+    summary: input.summary,
+    result: input.result,
+    createdAt,
+    notes: input.limitations,
+  })
+
+  return {
+    project: evidenceResult.project,
+    run: runResult.run,
+    evidence: evidenceResult.evidence,
   }
 }
 
@@ -726,4 +769,8 @@ function replaceBranch(project: ProjectState, index: number, branch: BranchPropo
     ...project,
     branchProposals,
   }
+}
+
+function normalizeText(value: string): string {
+  return value.trim().replace(/\s+/g, ' ')
 }

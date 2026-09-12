@@ -86,6 +86,14 @@ test('migrates legacy v1 workspace data from storage', () => {
     payload: {
       ...createEmptyWorkspaceSnapshot(),
       activeProjectId: 'project-1',
+      threads: [{
+        id: 'thread-1',
+        projectId: 'project-1',
+        type: 'idea',
+        title: '旧 Idea',
+        summary: '旧版对话',
+        updatedAt: 1,
+      }],
     },
   }))
 
@@ -93,6 +101,8 @@ test('migrates legacy v1 workspace data from storage', () => {
   const loaded = repository.load()
 
   assert.equal(loaded.activeProjectId, 'project-1')
+  assert.equal(loaded.threads[0]?.mode, 'idea')
+  assert.equal('type' in (loaded.threads[0] ?? {}), false)
 })
 
 test('reports recoverable invalid workspace data without clearing storage', () => {

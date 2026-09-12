@@ -5,11 +5,68 @@ import {
   appendEvidenceRecord,
   appendExperimentNode,
   appendHypothesisRevision,
+  appendWorkspaceThread,
   approveExperimentNodeDraft,
   createWorkspaceProject,
   draftFormalPromotion,
+  findWorkspaceThreadIdByMode,
+  lockWorkspaceThreadMode,
   selectBranchProposal,
 } from './domain-adapter.ts'
+
+test('new projects start without preselected conversations', () => {
+  const project = createWorkspaceProject('project-1', 'Sampler study', 1)
+
+  assert.deepEqual(project.threads, [])
+})
+
+test('a project can hold multiple conversations with independently fixed modes', () => {
+  const project = createWorkspaceProject('project-1', 'Sampler study', 1)
+  const first = appendWorkspaceThread(project, 'idea', 2)
+  const second = appendWorkspaceThread(first.project, 'idea', 3)
+  const third = appendWorkspaceThread(second.project, 'experiment', 4)
+
+  assert.deepEqual(
+    third.project.threads.map((thread) => thread.mode),
+    ['idea', 'idea', 'experiment'],
+  )
+  assert.deepEqual(
+    third.project.threads.map((thread) => thread.id),
+    ['thread-1', 'thread-2', 'thread-3'],
+  )
+})
+
+test('finds a conversation by fixed mode without relying on generated ids', () => {
+  const project = createWorkspaceProject('project-1', 'Sampler study', 1)
+  const idea = appendWorkspaceThread(project, 'idea', 2)
+  const experiment = appendWorkspaceThread(idea.project, 'experiment', 3)
+
+  assert.equal(findWorkspaceThreadIdByMode(experiment.project, 'experiment'), experiment.thread.id)
+  assert.equal(findWorkspaceThreadIdByMode(experiment.project, 'writing'), null)
+})
+
+test('locking an unset conversation mode is one-way', () => {
+  const project = createWorkspaceProject('project-1', 'Sampler study', 1)
+  const unsetProject = {
+    ...project,
+    threads: [{
+      id: 'thread-1',
+      projectId: project.id,
+      mode: null,
+      title: '未命名对话',
+      summary: '等待选择工作模式。',
+      updatedAt: 2,
+    }],
+  }
+
+  const locked = lockWorkspaceThreadMode(unsetProject, 'thread-1', 'writing', 3)
+
+  assert.equal(locked.threads[0]?.mode, 'writing')
+  assert.throws(
+    () => lockWorkspaceThreadMode(locked, 'thread-1', 'idea', 4),
+    /already has a fixed mode/,
+  )
+})
 
 test('selecting a branch records a human decision without starting a run', () => {
   const project = createWorkspaceProject('project-1', 'Sampler study', 1)

@@ -1,0 +1,166 @@
+/* CoScience Design Tokens */
+/* 参考 Codex (Wikimedia) 和 Zcode 设计系统 */
+
+:root {
+  /* 颜色系统 */
+  /* 基础颜色 */
+  --cdx-color-base: #fffdf8;
+  --cdx-color-base-dark: #f7f3ea;
+  --cdx-color-base-deep: #ece6d9;
+  --cdx-color-base-inset: #f5f0e5;
+  
+  /* 文本颜色 */
+  --cdx-color-text: #17231e;
+  --cdx-color-text-subtle: #69766e;
+  --cdx-color-text-disabled: #9eafa3;
+  --cdx-color-text-inverse: #fffaf0;
+  
+  /* 边框颜色 */
+  --cdx-color-border: #d8d0c1;
+  --cdx-color-border-subtle: #e2daca;
+  --cdx-color-border-strong: #c9c1b2;
+  --cdx-color-border-interactive: #24483c;
+  
+  /* 强调色 */
+  --cdx-color-progressive: #173e33;
+  --cdx-color-progressive-hover: #255849;
+  --cdx-color-progressive-active: #1d3b30;
+  --cdx-color-progressive-focus: #d9a94b;
+  
+  /* 语义颜色 */
+  --cdx-color-destructive: #a95c3a;
+  --cdx-color-destructive-hover: #c46e48;
+  --cdx-color-warning: #b98b3a;
+  --cdx-color-warning-hover: #d4a048;
+  --cdx-color-success: #6f8a78;
+  --cdx-color-success-hover: #8aaa98;
+  --cdx-color-info: #5a7a8a;
+  --cdx-color-info-hover: #6a8a9a;
+  
+  /* 背景色 */
+  --cdx-background-color-interactive: #1a4b3d;
+  --cdx-background-color-interactive-hover: #255849;
+  --cdx-background-color-interactive-active: #1d3b30;
+  --cdx-background-color-interactive-disabled: #2c6755;
+  
+  /* 间距系统 */
+  --cdx-spacing-50: 4px;
+  --cdx-spacing-75: 6px;
+  --cdx-spacing-100: 8px;
+  --cdx-spacing-150: 12px;
+  --cdx-spacing-200: 16px;
+  --cdx-spacing-250: 20px;
+  --cdx-spacing-300: 24px;
+  --cdx-spacing-400: 32px;
+  --cdx-spacing-500: 40px;
+  --cdx-spacing-600: 48px;
+  
+  /* 字体系统 */
+  /* 字体族 */
+  --cdx-font-family-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --cdx-font-family-serif: Georgia, "Times New Roman", serif;
+  --cdx-font-family-monospace: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  
+  /* 字体大小 */
+  --cdx-font-size-50: 10px;
+  --cdx-font-size-75: 11px;
+  --cdx-font-size-100: 12px;
+  --cdx-font-size-125: 13px;
+  --cdx-font-size-150: 15px;
+  --cdx-font-size-200: 19px;
+  --cdx-font-size-250: 24px;
+  --cdx-font-size-300: 25px;
+  --cdx-font-size-350: 32px;
+  --cdx-font-size-400: 39px;
+  
+  /* 字体权重 */
+  --cdx-font-weight-normal: 400;
+  --cdx-font-weight-medium: 500;
+  --cdx-font-weight-semibold: 600;
+  --cdx-font-weight-bold: 700;
+  
+  /* 行高 */
+  --cdx-line-height-100: 1.08;
+  --cdx-line-height-125: 1.25;
+  --cdx-line-height-135: 1.35;
+  --cdx-line-height-145: 1.45;
+  --cdx-line-height-150: 1.5;
+  --cdx-line-height-160: 1.6;
+  
+  /* 圆角系统 */
+  --cdx-border-radius-base: 4px;
+  --cdx-border-radius-medium: 6px;
+  --cdx-border-radius-large: 999px;
+  
+  /* 阴影系统 */
+  --cdx-box-shadow-base: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --cdx-box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --cdx-box-shadow-large: 0 14px 38px rgba(43, 50, 43, 0.08);
+  --cdx-box-shadow-focus: 0 0 0 3px rgba(217, 169, 75, 0.4);
+  
+  /* 过渡系统 */
+  --cdx-transition-duration-fast: 100ms;
+  --cdx-transition-duration-base: 140ms;
+  --cdx-transition-duration-slow: 300ms;
+  --cdx-transition-timing-function: ease;
+  
+  /* z-index系统 */
+  --cdx-z-index-dropdown: 100;
+  --cdx-z-index-sticky: 200;
+  --cdx-z-index-fixed: 300;
+  --cdx-z-index-modal-backdrop: 400;
+  --cdx-z-index-modal: 500;
+  --cdx-z-index-popover: 600;
+  --cdx-z-index-tooltip: 700;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 基础颜色 */
+    --cdx-color-base: #1a1a1a;
+    --cdx-color-base-dark: #121212;
+    --cdx-color-base-deep: #0a0a0a;
+    --cdx-color-base-inset: #222222;
+    
+    /* 文本颜色 */
+    --cdx-color-text: #f5f5f5;
+    --cdx-color-text-subtle: #a0a0a0;
+    --cdx-color-text-disabled: #606060;
+    --cdx-color-text-inverse: #1a1a1a;
+    
+    /* 边框颜色 */
+    --cdx-color-border: #333333;
+    --cdx-color-border-subtle: #2a2a2a;
+    --cdx-color-border-strong: #404040;
+    --cdx-color-border-interactive: #4CAF50;
+    
+    /* 强调色 */
+    --cdx-color-progressive: #4CAF50;
+    --cdx-color-progressive-hover: #66BB6A;
+    --cdx-color-progressive-active: #388E3C;
+    --cdx-color-progressive-focus: #FFB74D;
+    
+    /* 语义颜色 */
+    --cdx-color-destructive: #ef5350;
+    --cdx-color-destructive-hover: #f44336;
+    --cdx-color-warning: #ffb74d;
+    --cdx-color-warning-hover: #ffa726;
+    --cdx-color-success: #66BB6A;
+    --cdx-color-success-hover: #81C784;
+    --cdx-color-info: #64B5F6;
+    --cdx-color-info-hover: #42A5F5;
+    
+    /* 背景色 */
+    --cdx-background-color-interactive: #2d5a27;
+    --cdx-background-color-interactive-hover: #3d7a37;
+    --cdx-background-color-interactive-active: #1d4a17;
+    --cdx-background-color-interactive-disabled: #1a3a14;
+    
+    /* 阴影 */
+    --cdx-box-shadow-base: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --cdx-box-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --cdx-box-shadow-large: 0 14px 38px rgba(0, 0, 0, 0.4);
+    --cdx-box-shadow-focus: 0 0 0 3px rgba(76, 175, 80, 0.4);
+  }
+}

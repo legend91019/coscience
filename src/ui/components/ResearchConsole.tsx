@@ -1,4 +1,4 @@
-import { Beaker, BookOpen, CheckCircle2, FileText, FlaskConical, GitBranch, Lightbulb, Plus, ShieldCheck, Server } from 'lucide-react'
+import { Beaker, BookOpen, CheckCircle2, CircleHelp, FileText, FlaskConical, GitBranch, Lightbulb, Plus, ShieldCheck, Server, Upload, File } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { DesktopSettings, type DesktopSettingsState } from './DesktopSettings.tsx'
@@ -11,11 +11,14 @@ import {
   appendHypothesisRevision,
   approveExperimentNodeDraft,
   draftFormalPromotion,
+  findWorkspaceThreadIdByMode,
   reviewEvidenceRecord,
   selectBranchProposal,
   type EvidenceResult,
   type ExperimentGroup,
   type SourceRecord,
+  type PaperCategory,
+  type PaperMetadata,
   type UiEvidenceRecord,
   type UiExperimentNode,
   type UiHypothesisRevision,
@@ -60,31 +63,51 @@ export function ResearchConsole(props: ResearchConsoleProps) {
     )
   }
 
-  if (props.thread.type === 'idea') {
+  const project = props.project
+  const thread = props.thread
+
+  if (thread.mode === null) {
     return (
       <aside className="control-console" aria-label="工作区控制台">
         <div className="console-toolbar">
           <TabButton active label="研究" onClick={() => props.onSelectConsoleMode('research')} />
           <TabButton active={false} label="设置" onClick={() => props.onSelectConsoleMode('settings')} />
         </div>
-        <IdeaConsole project={props.project} onUpdateProject={props.onUpdateProject} />
+        <div className="deferred-console">
+          <CircleHelp size={24} />
+          <h2>未定模式对话</h2>
+          <p>请在左侧对话上打开右键菜单，选择并固定一个工作模式。</p>
+        </div>
       </aside>
     )
   }
 
-  if (props.thread.type === 'experiment') {
+  if (thread.mode === 'idea') {
     return (
       <aside className="control-console" aria-label="工作区控制台">
         <div className="console-toolbar">
           <TabButton active label="研究" onClick={() => props.onSelectConsoleMode('research')} />
           <TabButton active={false} label="设置" onClick={() => props.onSelectConsoleMode('settings')} />
         </div>
-        <ExperimentConsole project={props.project} onUpdateProject={props.onUpdateProject} />
+        <IdeaConsole project={project} onUpdateProject={props.onUpdateProject} />
       </aside>
     )
   }
 
-  if (props.thread.type === 'figure') {
+  if (thread.mode === 'experiment') {
+    return (
+      <aside className="control-console" aria-label="工作区控制台">
+        <div className="console-toolbar">
+          <TabButton active label="研究" onClick={() => props.onSelectConsoleMode('research')} />
+          <TabButton active={false} label="设置" onClick={() => props.onSelectConsoleMode('settings')} />
+        </div>
+        <ExperimentConsole project={project} onUpdateProject={props.onUpdateProject} />
+      </aside>
+    )
+  }
+
+  if (thread.mode === 'figure') {
+    const experimentThreadId = findWorkspaceThreadIdByMode(project, 'experiment')
     return (
       <aside className="control-console" aria-label="工作区控制台">
         <div className="console-toolbar">
@@ -95,12 +118,13 @@ export function ResearchConsole(props: ResearchConsoleProps) {
           icon={<FileText size={24} />}
           title="画图"
           body="当前版本仅支持手动图表规划。图表生成桥接尚未接入。"
-          onJump={() => props.onSelectThread(`${props.project.id}-pilot`)}
+          onJump={experimentThreadId ? () => props.onSelectThread(experimentThreadId) : undefined}
         />
       </aside>
     )
   }
 
+  const ideaThreadId = findWorkspaceThreadIdByMode(project, 'idea')
   return (
     <aside className="control-console" aria-label="工作区控制台">
       <div className="console-toolbar">
@@ -111,7 +135,7 @@ export function ResearchConsole(props: ResearchConsoleProps) {
         icon={<BookOpen size={24} />}
         title="写作"
         body="写作草稿可以引用已验收的证据，但自动论文生成桥接尚未接入。"
-        onJump={() => props.onSelectThread(`${props.project.id}-idea`)}
+        onJump={ideaThreadId ? () => props.onSelectThread(ideaThreadId) : undefined}
       />
     </aside>
   )
@@ -135,6 +159,8 @@ function IdeaConsole({
   const [theory, setTheory] = useState('')
   const [scope, setScope] = useState('')
   const [predictions, setPredictions] = useState('')
+  const [paperCategory, setPaperCategory] = useState<PaperCategory>('skim-read')
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
 
   function submitHypothesis(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -179,6 +205,53 @@ function IdeaConsole({
     setSourceNotes('')
   }
 
+  async function handleUploadPaper() {
+    if (!selectedFile) return
+    
+    try {
+      const papersDir = `${project.id}/papers`
+      const result = await window.electronAPI.uploadPaper(selectedFile, papersDir, paperCategory)
+      
+      if (result.success) {
+        // 添加到来源列表
+        const createdAt = Date.now()
+        const source: SourceRecord = {
+          id: `source-${project.sources.length + 1}`,
+          projectId: project.id,
+          kind: paperCategory === 'deep-read' ? 'baseline' : 'reference',
+          title: result.metadata?.title ?? sourceTitle.trim(),
+          url: selectedFile,
+          uncertainty: '',
+          notes: `PDF文件: ${selectedFile.split(/[/\\]/).pop()}`,
+          createdAt,
+        }
+        
+        onUpdateProject({
+          ...project,
+          updatedAt: createdAt,
+          sources: [...project.sources, source],
+        })
+        
+        setSelectedFile(null)
+      }
+    } catch (error) {
+      console.error('Failed to upload paper:', error)
+    }
+  }
+
+  function handleFileSelect() {
+    // 这里应该调用 Electron 的文件选择对话框
+    window.electronAPI.selectFile().then((filePath: string | null) => {
+      if (filePath) {
+        setSelectedFile(filePath)
+      }
+    })
+  }
+
+  // 获取泛读和精读论文列表
+  const skimReadPapers = project.sources.filter(s => s.kind === 'reference')
+  const deepReadPapers = project.sources.filter(s => s.kind === 'baseline')
+
   return (
     <div className="console-stack">
       <div className="segmented-control segmented-control--tabs" role="tablist" aria-label="Idea panel">
@@ -220,6 +293,60 @@ function IdeaConsole({
               精读
             </button>
           </div>
+          
+          {/* PDF上传区域 */}
+          <div className="paper-upload-area">
+            <div className="paper-upload-header">
+              <Upload size={16} />
+              <span>上传论文</span>
+            </div>
+            
+            <div className="paper-category-select">
+              <label>分类：</label>
+              <div className="paper-category-buttons">
+                <button 
+                  type="button"
+                  className={paperCategory === 'skim-read' ? 'selected' : ''}
+                  onClick={() => setPaperCategory('skim-read')}
+                >
+                  泛读
+                </button>
+                <button 
+                  type="button"
+                  className={paperCategory === 'deep-read' ? 'selected' : ''}
+                  onClick={() => setPaperCategory('deep-read')}
+                >
+                  精读
+                </button>
+              </div>
+            </div>
+            
+            {selectedFile ? (
+              <div className="paper-selected-file">
+                <File size={16} />
+                <span>{selectedFile.split(/[/\\]/).pop()}</span>
+                <button type="button" onClick={() => setSelectedFile(null)}>更换</button>
+              </div>
+            ) : (
+              <button type="button" className="paper-select-button" onClick={handleFileSelect}>
+                <Upload size={16} />
+                选择PDF文件
+              </button>
+            )}
+            
+            {selectedFile && (
+              <button type="button" className="paper-upload-button" onClick={handleUploadPaper}>
+                上传到{paperCategory === 'deep-read' ? '精读' : '泛读'}文件夹
+              </button>
+            )}
+          </div>
+          
+          {/* 论文矩阵展示 */}
+          <PaperMatrix 
+            skimReadPapers={skimReadPapers} 
+            deepReadPapers={deepReadPapers} 
+          />
+          
           <form className="field-stack" onSubmit={submitSource}>
             <TextInput label="标题" value={sourceTitle} onChange={setSourceTitle} />
             <TextInput label="来源链接" value={sourceUrl} onChange={setSourceUrl} />
@@ -521,6 +648,54 @@ function SourceList({ sources }: { sources: SourceRecord[] }) {
   )
 }
 
+function PaperMatrix({ 
+  skimReadPapers, 
+  deepReadPapers 
+}: { 
+  skimReadPapers: SourceRecord[]
+  deepReadPapers: SourceRecord[] 
+}) {
+  if (skimReadPapers.length === 0 && deepReadPapers.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="paper-matrix">
+      <h4 className="paper-matrix-title">论文矩阵</h4>
+      
+      <div className="paper-matrix-grid">
+        <div className="paper-matrix-column">
+          <h5 className="paper-matrix-column-title">泛读论文 ({skimReadPapers.length})</h5>
+          <div className="paper-matrix-list">
+            {skimReadPapers.map((paper) => (
+              <div className="paper-matrix-item" key={paper.id}>
+                <div className="paper-matrix-item-title">{paper.title}</div>
+                <div className="paper-matrix-item-meta">
+                  {paper.uncertainty && <span>不确定性: {paper.uncertainty}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="paper-matrix-column">
+          <h5 className="paper-matrix-column-title">精读论文 ({deepReadPapers.length})</h5>
+          <div className="paper-matrix-list">
+            {deepReadPapers.map((paper) => (
+              <div className="paper-matrix-item" key={paper.id}>
+                <div className="paper-matrix-item-title">{paper.title}</div>
+                <div className="paper-matrix-item-meta">
+                  {paper.uncertainty && <span>不确定性: {paper.uncertainty}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function EvidenceList({
   evidences,
   onReview,
@@ -635,17 +810,19 @@ function DeferredConsole({
   icon: ReactNode
   title: string
   body: string
-  onJump: () => void
+  onJump?: () => void
 }) {
   return (
     <div className="deferred-console">
       {icon}
       <h2>{title}</h2>
       <p>{body}</p>
-      <button type="button" onClick={onJump}>
-        <Beaker size={16} />
-        查看证据
-      </button>
+      {onJump ? (
+        <button type="button" onClick={onJump}>
+          <Beaker size={16} />
+          查看证据
+        </button>
+      ) : null}
     </div>
   )
 }

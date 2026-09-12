@@ -5,18 +5,33 @@ export type EvidenceResult = 'positive' | 'negative' | 'inconclusive'
 export type EvidenceReviewStatus = 'pending' | 'accepted' | 'rejected'
 export type ConnectionState = 'not-configured' | 'disconnected' | 'connected' | 'unknown'
 export type ModelState = 'not-configured' | 'ready'
+export type PaperCategory = 'deep-read' | 'skim-read'
+
+export type PaperMetadata = {
+  id: string
+  title: string
+  authors: string[]
+  abstract?: string
+  doi?: string
+  filePath: string
+  category: PaperCategory
+  uploadedAt: number
+  tags: string[]
+  notes?: string
+}
 
 export type WorkspaceProjectSummary = {
   id: string
   name: string
   summary: string
   updatedAt: number
+  folderPath?: string
 }
 
 export type WorkspaceThread = {
   id: string
   projectId: string
-  type: WorkspaceType
+  mode: WorkspaceType | null
   title: string
   summary: string
   updatedAt: number
@@ -137,50 +152,23 @@ export type WorkspaceProjectBundle = WorkspaceProjectSummary & {
   decisions: UiHumanDecision[]
 }
 
-export function createWorkspaceProject(id: string, name: string, createdAt = Date.now()): WorkspaceProjectBundle {
+export function createWorkspaceProject(
+  id: string,
+  name: string,
+  createdAt = Date.now(),
+  folderPath?: string,
+): WorkspaceProjectBundle {
   const project: WorkspaceProjectSummary = {
     id,
     name,
     summary: 'Human-led evidence loop workspace.',
     updatedAt: createdAt,
+    folderPath,
   }
 
   return {
     ...project,
-    threads: [
-      {
-        id: `${id}-idea`,
-        projectId: id,
-        type: 'idea',
-        title: 'Idea and direction',
-        summary: 'Hypotheses, interpretations, and manual research decisions.',
-        updatedAt: createdAt,
-      },
-      {
-        id: `${id}-pilot`,
-        projectId: id,
-        type: 'experiment',
-        title: 'Reproduction and pilots',
-        summary: 'Pipeline checks, baseline reproduction, and low-cost validation.',
-        updatedAt: createdAt,
-      },
-      {
-        id: `${id}-figures`,
-        projectId: id,
-        type: 'figure',
-        title: 'Figures',
-        summary: 'Figure plans and source mappings.',
-        updatedAt: createdAt,
-      },
-      {
-        id: `${id}-writing`,
-        projectId: id,
-        type: 'writing',
-        title: 'Writing',
-        summary: 'Claims tied back to accepted evidence.',
-        updatedAt: createdAt,
-      },
-    ],
+    threads: [],
     notes: [],
     sources: [],
     hypotheses: [],
@@ -188,6 +176,67 @@ export function createWorkspaceProject(id: string, name: string, createdAt = Dat
     runs: [],
     evidences: [],
     decisions: [],
+  }
+}
+
+export function appendWorkspaceThread(
+  project: WorkspaceProjectBundle,
+  mode: WorkspaceType,
+  createdAt = Date.now(),
+): { project: WorkspaceProjectBundle; thread: WorkspaceThread } {
+  const sequence = project.threads.length + 1
+  const thread: WorkspaceThread = {
+    id: `thread-${sequence}`,
+    projectId: project.id,
+    mode,
+    title: `${workspaceTypeLabel(mode)} ${workspaceTypeCount(project.threads, mode) + 1}`,
+    summary: workspaceTypeSummary(mode),
+    updatedAt: createdAt,
+  }
+
+  return {
+    project: {
+      ...touchProject(project, createdAt),
+      threads: [...project.threads, thread],
+    },
+    thread,
+  }
+}
+
+export function findWorkspaceThreadIdByMode(
+  project: WorkspaceProjectBundle,
+  mode: WorkspaceType,
+): string | null {
+  return project.threads.find((thread) => thread.mode === mode)?.id ?? null
+}
+
+export function lockWorkspaceThreadMode(
+  project: WorkspaceProjectBundle,
+  threadId: string,
+  mode: WorkspaceType,
+  updatedAt = Date.now(),
+): WorkspaceProjectBundle {
+  const thread = project.threads.find((item) => item.id === threadId)
+  if (!thread) {
+    throw new Error(`Cannot lock missing thread ${threadId}.`)
+  }
+  if (thread.mode !== null) {
+    throw new Error(`Thread ${threadId} already has a fixed mode.`)
+  }
+
+  return {
+    ...touchProject(project, updatedAt),
+    threads: project.threads.map((item) =>
+      item.id === threadId
+        ? {
+            ...item,
+            mode,
+            title: `${workspaceTypeLabel(mode)} ${workspaceTypeCount(project.threads, mode) + 1}`,
+            summary: workspaceTypeSummary(mode),
+            updatedAt,
+          }
+        : item,
+    ),
   }
 }
 
@@ -425,4 +474,26 @@ function touchProject(project: WorkspaceProjectBundle, updatedAt: number): Works
 
 function nextId(prefix: string, currentLength: number): string {
   return `${prefix}-${currentLength + 1}`
+}
+
+export function workspaceTypeLabel(type: WorkspaceType): string {
+  return {
+    idea: 'Idea 对话',
+    experiment: '实验对话',
+    figure: '画图对话',
+    writing: '写作对话',
+  }[type]
+}
+
+export function workspaceTypeSummary(type: WorkspaceType): string {
+  return {
+    idea: '假设、解释与研究方向讨论。',
+    experiment: '实验计划、证据与人工决策。',
+    figure: '图表规划与来源映射。',
+    writing: '将已验收证据组织成论文草稿。',
+  }[type]
+}
+
+function workspaceTypeCount(threads: WorkspaceThread[], mode: WorkspaceType): number {
+  return threads.filter((thread) => thread.mode === mode).length
 }

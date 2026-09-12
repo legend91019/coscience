@@ -1,6 +1,6 @@
-import type { WorkspaceSnapshot } from './domain-adapter.ts'
+import type { WorkspaceSnapshot, WorkspaceThread, WorkspaceType } from './domain-adapter.ts'
 
-export const WORKSPACE_SCHEMA_VERSION = 1
+export const WORKSPACE_SCHEMA_VERSION = 2
 export const WORKSPACE_STORAGE_KEY = 'coscience.workspace.v1'
 
 export function exportWorkspaceSnapshot(snapshot: WorkspaceSnapshot): string {
@@ -10,10 +10,16 @@ export function exportWorkspaceSnapshot(snapshot: WorkspaceSnapshot): string {
 export function importWorkspaceSnapshot(raw: string): WorkspaceSnapshot {
   let decoded: unknown
   try { decoded = JSON.parse(raw) } catch (error) { throw new InvalidWorkspaceDataError('Workspace export is not valid JSON.') }
-  if (!isRecord(decoded) || decoded.schemaVersion !== WORKSPACE_SCHEMA_VERSION || !isWorkspaceSnapshot(decoded.payload)) {
+  if (!isRecord(decoded) || !isWorkspaceSnapshot(decoded.payload)) {
     throw new InvalidWorkspaceDataError('Workspace export uses an unsupported schema or is missing fields.')
   }
-  return decoded.payload
+  if (decoded.schemaVersion === 1) {
+    return migrateV1Snapshot(decoded.payload)
+  }
+  if (decoded.schemaVersion !== WORKSPACE_SCHEMA_VERSION) {
+    throw new InvalidWorkspaceDataError('Workspace export uses an unsupported schema or is missing fields.')
+  }
+  return normalizeWorkspaceSnapshot(decoded.payload)
 }
 
 export class InvalidWorkspaceDataError extends Error {
@@ -89,6 +95,27 @@ function isWorkspaceSnapshot(value: unknown): value is WorkspaceSnapshot {
     'activeProjectId' in value &&
     'activeThreadId' in value
   )
+}
+
+function migrateV1Snapshot(value: WorkspaceSnapshot): WorkspaceSnapshot {
+  return normalizeWorkspaceSnapshot(value)
+}
+
+function normalizeWorkspaceSnapshot(value: WorkspaceSnapshot): WorkspaceSnapshot {
+  return {
+    ...value,
+    threads: value.threads.map((thread) => {
+      const legacyThread = thread as WorkspaceThread & { type?: WorkspaceType }
+      return {
+        id: legacyThread.id,
+        projectId: legacyThread.projectId,
+        mode: legacyThread.mode ?? legacyThread.type ?? null,
+        title: legacyThread.title,
+        summary: legacyThread.summary,
+        updatedAt: legacyThread.updatedAt,
+      }
+    }),
+  }
 }
 
 function hasArray(value: Record<string, unknown>, key: string): boolean {

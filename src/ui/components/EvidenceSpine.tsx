@@ -29,21 +29,23 @@ export function EvidenceSpine(props: EvidenceSpineProps) {
 
   const notes = props.project.notes.filter((item) => item.threadId === props.thread?.id)
   const latestHypothesis = props.project.hypotheses.at(-1) ?? null
-  const activeStep = activeStepForThread(props.thread.type)
+  const activeStep = activeStepForThread(props.thread.mode)
+  const project = props.project
+  const thread = props.thread
 
   function submitNote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!note.trim()) return
     const createdAt = Date.now()
     props.onUpdateProject({
-      ...props.project,
+      ...project,
       updatedAt: createdAt,
       notes: [
-        ...props.project.notes,
+        ...project.notes,
         {
-          id: `note-${props.project.notes.length + 1}`,
-          projectId: props.project.id,
-          threadId: props.thread.id,
+          id: `note-${project.notes.length + 1}`,
+          projectId: project.id,
+          threadId: thread.id,
           body: note.trim(),
           createdAt,
         },
@@ -66,10 +68,10 @@ export function EvidenceSpine(props: EvidenceSpineProps) {
 
       <header className="conversation-header evidence-header">
         <div>
-          <p className="eyebrow">{labelForType(props.thread.type)}</p>
-          <h2>{threadTitle(props.thread.type)}</h2>
+          <p className="eyebrow">{labelForType(props.thread.mode)}</p>
+          <h2>{props.thread.title}</h2>
         </div>
-        <span>{props.project.name}</span>
+        <span>{project.name}</span>
       </header>
 
       <div className="evidence-surface">
@@ -97,7 +99,7 @@ export function EvidenceSpine(props: EvidenceSpineProps) {
             </div>
             <div>
               <span className="spine-note-label">证据状态</span>
-              <strong>{props.project.evidences.length > 0 ? `${props.project.evidences.length} 条记录` : '尚未记录证据'}</strong>
+              <strong>{project.evidences.length > 0 ? `${project.evidences.length} 条记录` : '尚未记录证据'}</strong>
             </div>
           </div>
         </section>
@@ -137,28 +139,20 @@ export function EvidenceSpine(props: EvidenceSpineProps) {
   )
 }
 
-function activeStepForThread(type: WorkspaceThread['type']) {
+function activeStepForThread(type: WorkspaceThread['mode']) {
   if (type === 'idea') return evidenceSpineSteps()[0]!
   if (type === 'experiment') return evidenceSpineSteps()[1]!
   if (type === 'figure') return evidenceSpineSteps()[2]!
   return evidenceSpineSteps()[3]!
 }
 
-function labelForType(type: WorkspaceThread['type']): string {
+function labelForType(type: WorkspaceThread['mode']): string {
+  if (!type) return '未定模式对话'
   return {
     idea: 'Idea 对话',
     experiment: '实验对话',
     figure: '画图对话',
     writing: '写作对话',
-  }[type]
-}
-
-function threadTitle(type: WorkspaceThread['type']): string {
-  return {
-    idea: 'Idea 与方向',
-    experiment: '复现与小规模验证',
-    figure: '画图',
-    writing: '写作',
   }[type]
 }
 

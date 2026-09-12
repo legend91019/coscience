@@ -31,6 +31,8 @@ test('registers the activate handler after Electron becomes ready', async () => 
         app: fakeApp,
         BrowserWindow: fakeBrowserWindow,
         session: { defaultSession: { setPermissionRequestHandler: () => {} } },
+        dialog: { showOpenDialog: async () => ({ canceled: true, filePaths: [] }) },
+        ipcMain: { handle: () => {} },
       }
     }
     if (parent?.filename === mainPath && request === './service/main.cjs') {

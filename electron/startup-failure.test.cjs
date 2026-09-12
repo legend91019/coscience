@@ -31,6 +31,8 @@ test('quits cleanly when the local service cannot start', async () => {
         app: fakeApp,
         BrowserWindow: fakeBrowserWindow,
         session: { defaultSession: { setPermissionRequestHandler: () => {} } },
+        dialog: { showOpenDialog: async () => ({ canceled: true, filePaths: [] }) },
+        ipcMain: { handle: () => {} },
       }
     }
     if (parent?.filename === mainPath && request === './service/main.cjs') {

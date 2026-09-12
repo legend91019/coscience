@@ -10,9 +10,11 @@ type WorkspaceShellProps = {
   activeThread: WorkspaceThread | null
   storageWarning: string | null
   onCreateProject: () => void
-  onCreateConversation: (type: WorkspaceType) => void
+  onCreateConversation: (projectId?: string) => void
   onSelectProject: (projectId: string) => void
   onSelectThread: (threadId: string) => void
+  onLockThreadMode: (threadId: string, mode: WorkspaceType) => void
+  onOpenOverview: () => void
   onUpdateProject: (project: WorkspaceProjectBundle) => void
   onResetWorkspace: () => void
   consoleMode: 'research' | 'settings'
@@ -27,15 +29,17 @@ export function WorkspaceShell(props: WorkspaceShellProps) {
       <WorkspaceRail
         runtime={props.snapshot.runtime}
         projects={props.snapshot.projects}
+        threads={props.snapshot.threads}
         activeProject={props.activeProject}
         activeThread={props.activeThread}
         onCreateProject={props.onCreateProject}
         onCreateConversation={props.onCreateConversation}
         onSelectProject={props.onSelectProject}
         onSelectThread={props.onSelectThread}
+        onLockThreadMode={props.onLockThreadMode}
+        onOpenOverview={props.onOpenOverview}
         onOpenSettings={() => props.onSelectConsoleMode('settings')}
       />
-
       <EvidenceSpine
         project={props.activeProject}
         thread={props.activeThread}

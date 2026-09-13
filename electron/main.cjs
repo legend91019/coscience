@@ -19,7 +19,7 @@ function createWindow() {
     height: 940,
     minWidth: 1080,
     minHeight: 700,
-    backgroundColor: '#f6f4ed',
+    backgroundColor: '#131416',
     title: 'CoScience',
     webPreferences: {
       contextIsolation: true,

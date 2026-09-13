@@ -1,6 +1,6 @@
 import type { WorkspaceProjectBundle, WorkspaceSnapshot, WorkspaceThread, WorkspaceType } from '../domain-adapter.ts'
 import type { DesktopSettingsState } from './DesktopSettings.tsx'
-import { EvidenceSpine } from './EvidenceSpine.tsx'
+import { ChatPanel } from './ChatPanel.tsx'
 import { ResearchConsole } from './ResearchConsole.tsx'
 import { WorkspaceRail } from './WorkspaceRail.tsx'
 
@@ -15,6 +15,7 @@ type WorkspaceShellProps = {
   onSelectThread: (threadId: string) => void
   onLockThreadMode: (threadId: string, mode: WorkspaceType) => void
   onOpenOverview: () => void
+  onOpenFolder: () => void
   onUpdateProject: (project: WorkspaceProjectBundle) => void
   onResetWorkspace: () => void
   consoleMode: 'research' | 'settings'
@@ -38,16 +39,14 @@ export function WorkspaceShell(props: WorkspaceShellProps) {
         onSelectThread={props.onSelectThread}
         onLockThreadMode={props.onLockThreadMode}
         onOpenOverview={props.onOpenOverview}
+        onOpenFolder={props.onOpenFolder}
         onOpenSettings={() => props.onSelectConsoleMode('settings')}
       />
-      <EvidenceSpine
+      <ChatPanel
         project={props.activeProject}
         thread={props.activeThread}
-        storageWarning={props.storageWarning}
         onUpdateProject={props.onUpdateProject}
-        onResetWorkspace={props.onResetWorkspace}
       />
-
       <ResearchConsole
         project={props.activeProject}
         thread={props.activeThread}

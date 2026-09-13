@@ -7,6 +7,7 @@ import {
   Command,
   FlaskConical,
   Folder,
+  FolderOpen,
   Lightbulb,
   MoreHorizontal,
   PenLine,
@@ -37,6 +38,7 @@ type WorkspaceRailProps = {
   onSelectThread: (threadId: string) => void
   onLockThreadMode: (threadId: string, mode: WorkspaceType) => void
   onOpenOverview: () => void
+  onOpenFolder: () => void
   onOpenSettings: () => void
 }
 
@@ -77,24 +79,24 @@ export function WorkspaceRail(props: WorkspaceRailProps) {
           <span>新对话</span>
           <kbd>Ctrl K</kbd>
         </button>
-        <button className="global-entry" type="button" onClick={props.onOpenOverview}>
-          <Command size={15} />
-          <span>所有项目</span>
+        <button className="global-entry" type="button" onClick={props.onOpenFolder}>
+          <FolderOpen size={15} />
+          <span>打开文件夹</span>
         </button>
       </div>
 
       <div className="rail-projects">
         <div className="rail-section-heading">
-          <h2>项目</h2>
-          <button className="icon-button quiet small" type="button" aria-label="新建项目" onClick={props.onCreateProject}>
-            <Plus size={15} />
+          <h2>文件夹</h2>
+          <button className="icon-button quiet small" type="button" aria-label="打开文件夹" onClick={props.onOpenFolder}>
+            <FolderOpen size={15} />
           </button>
         </div>
 
         {props.projects.length === 0 ? (
-          <button className="project-empty-row" type="button" onClick={props.onCreateProject}>
+          <button className="project-empty-row" type="button" onClick={props.onOpenFolder}>
             <Folder size={15} />
-            <span>新建文件夹项目</span>
+            <span>打开一个文件夹开始</span>
           </button>
         ) : (
           props.projects.map((project) => {
@@ -119,6 +121,7 @@ export function WorkspaceRail(props: WorkspaceRailProps) {
                     type="button"
                     aria-current={active ? 'page' : undefined}
                     onClick={() => props.onSelectProject(project.id)}
+                    title={project.folderPath ?? project.name}
                   >
                     <Folder size={15} />
                     <span>{project.name}</span>

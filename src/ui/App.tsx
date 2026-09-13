@@ -137,11 +137,15 @@ export function App() {
 
   // 新增：打开文件夹
   async function handleOpenFolder() {
+    if (typeof window.electronAPI?.selectFolder !== 'function') {
+      createProject()
+      return
+    }
     try {
       const path = await window.electronAPI.selectFolder()
       if (path) {
         setProjectPath(path)
-        
+
         // 检查是否是现有项目
         const result = await window.electronAPI.openProject(path)
         if (result.success) {
@@ -241,14 +245,24 @@ export function App() {
     return (
       <div className="app-welcome">
         <div className="app-welcome-content">
-          <h1>CoScience</h1>
-          <p>人类主导的AI研究工作台</p>
-          <button className="app-welcome-button" onClick={handleOpenFolder}>
-            打开文件夹
-          </button>
-          <button className="app-welcome-button secondary" onClick={createProject}>
-            创建新项目
-          </button>
+          <div className="app-welcome-mark">
+            <span className="app-welcome-mark-box">⚡</span>
+            <span className="app-welcome-brand">CoScience</span>
+          </div>
+          <p className="app-welcome-tagline">HUMAN-LED AI RESEARCH WORKBENCH</p>
+          <h1>人类主导的 AI 研究工作台</h1>
+          <p className="app-welcome-copy">
+            打开一个本地文件夹开始研究，或新建一个空白工作区。假设、证据与决策都保存在你自己的磁盘上。
+          </p>
+          <div className="app-welcome-actions">
+            <button className="app-welcome-button" onClick={handleOpenFolder}>
+              打开文件夹
+            </button>
+            <button className="app-welcome-button secondary" onClick={createProject}>
+              创建新项目
+            </button>
+          </div>
+          <p className="app-welcome-hint">数据存储在本地 · 不会自动上传</p>
         </div>
       </div>
     )
@@ -277,6 +291,7 @@ export function App() {
         onSelectThread={(threadId) => setSnapshot((current) => ({ ...current, activeThreadId: threadId }))}
         onLockThreadMode={lockConversationMode}
         onOpenOverview={() => setSnapshot((current) => ({ ...current, activeProjectId: null, activeThreadId: null }))}
+        onOpenFolder={handleOpenFolder}
         onUpdateProject={updateProject}
         onResetWorkspace={resetWorkspace}
         consoleMode={consoleMode}
